@@ -23,8 +23,8 @@ def add_bias(df):
     return df
 
 
-# Separate Features from response
-def separate(df_train):
+# Seperate Features from response
+def seperate(df_train):
     """
     input: dataframe
     """
@@ -42,7 +42,7 @@ def separate(df_train):
 # Add new features [Month, Day, Year]
 def split_date(df_train):
     """
-    splits date into separate features
+    splits date into seperate features
     input: dataframe
     """
     print("Splitting date...")
@@ -117,8 +117,9 @@ def linear_regress(x, y, eta, t, lamb):
         # y_hat = np.matmul(w.T, x)
         y_hat = np.matmul(x, w)
         e = (y - y_hat) ** 2
-
-        gradient_vector = (-2) * np.matmul(x.T, (y - y_hat))
+        print(x.T)
+        print((y - y_hat))
+        gradient_vector = (-2) * np.matmul(x.T,(y - y_hat))
 
         # Update weights
         w -= eta * gradient_vector
@@ -155,31 +156,6 @@ def linear_regress(x, y, eta, t, lamb):
     print()
     return w, errors, gradient, n
 
-#Validate with validation data
-def get_sse(x, y, w):
-    """
-    :param x: input
-    :param y: output
-    :param w: weight from training model
-    :return: errors - sse
-    """
-
-    y_hat = np.matmul(x, w)
-    e = (y - y_hat) ** 2
-    return sum(e)
-
-#Statistics on Numerical
-def get_stats(df1, categoical_list):
-    print(df1.describe().transpose().drop(columns=['count','25%', '50%', '75%']).drop(categoical_list))
-
-#Frequency Count on Categorical
-def get_freq_percentage_count(df1, col_names):
-    for col in col_names:
-        percentage = (df1[col].value_counts(normalize=True).rename_axis('values').to_frame('freq_percentage').sort_index() * 100).round(1).astype(str) + '%'
-        freq = df1[col].value_counts().rename_axis('values').to_frame('freq_count')
-        result = pd.concat([percentage, freq], axis=1, join='inner')
-        print(result)
-
 if __name__ == '__main__':
     #####DATA PREP#####
 
@@ -187,65 +163,16 @@ if __name__ == '__main__':
     df_train, df_dev, df_test = get_data()
     # Drop ID Feature
     df_train = df_train.drop("id", axis=1)
-    df_validation = df_dev.drop("id", axis=1)
 
     # Grab features and Response
-    x, y = separate(df_train)
-    x_val, y_val = separate(df_validation)
+    x, y = seperate(df_train)
 
     # Normalize continuous features
     x_norm_df = normalize(x)
-    x_val_norm_df = normalize(x_val)
-
     # Add Bias
     x_norm_df = add_bias(x_norm_df)
     x_norm = x_norm_df.values
-    x_val_norm_df = add_bias(x_val_norm_df)
-    x_val_norm = x_val_norm_df.values
 
-    learning_rates = [10**0, 10**-1]#, 10**-2, 10**-3, 10**-4, 10**-5, 10**-6, 10**-7]
-    lambdas = [0, 10**-3, 10**-2, 10**-1, 1, 10, 100]
+    x_norm_df
 
-    #get_stats(df_train, ['waterfront', 'grade', 'condition'])
-    #get_freq_percentage_count(df_train, ['waterfront', 'grade', 'condition'])
-
-    weights6, sse6, gradient6, iter6 = linear_regress(x_norm, y, 10 ** -5, 50000, 0)
-    #sse6_val = get_sse(x_val_norm, y_val,weights6)
-    #print(sse6_val)
-    """
-    weights1, sse1, gradient1, iter1 = linear_regress(x_norm, y, 10 ** 0, 50000, 0)
-    weights2, sse2, gradient2, iter2 = linear_regress(x_norm, y, 10 ** -1, 50000, 0)
-    weights3, sse3, gradient3, iter3 = linear_regress(x_norm, y, 10 ** -2, 50000, 0)
-    weights4, sse4, gradient4, iter4 = linear_regress(x_norm, y, 10 ** -3, 50000, 0)
-    weights5, sse5, gradient5, iter5 = linear_regress(x_norm, y, 10 ** -4, 50000, 0)
-    weights6, sse6, gradient6, iter6 = linear_regress(x_norm, y, 10 ** -5, 50000, 0)
-    weights7, sse7, gradient7, iter7 = linear_regress(x_norm, y, 10 ** -6, 50000, 0)
-    weights8, sse8, gradient8, iter8 = linear_regress(x_norm, y, 10 ** -7, 50000, 0)
-    
-    for learning_rate in learning_rates:
-        if learning_rate == 1:
-            string_learning_rate = "1e0"
-        elif learning_rate == 0.1:
-            string_learning_rate = "1e-1"
-        elif learning_rate == 0.01:
-            string_learning_rate = "1e-2"
-        elif learning_rate == 0.001:
-            string_learning_rate = "1e-3"
-        elif learning_rate == 0.0001:
-            string_learning_rate = "1e-4"
-        elif learning_rate == 0.00001:
-            string_learning_rate = "1e-5"
-        elif learning_rate == 0.000001:
-            string_learning_rate = "1e-6"
-        elif learning_rate == 0.0000001:
-            string_learning_rate = "1e-7"
-
-        weights, sse, gradient = linear_regress(x_norm, y, learning_rate, 2000, 0)
-        plt.plot(sse)
-        plt.title("SSE vs Iterations w/ Learning Rate "+ str(learning_rate) )
-        plt.legend(["Normalized SSE - Training Data"])
-        plt.xlabel('iterations')
-        plt.ylabel('SSE')
-        filename = "learning_rate_" + string_learning_rate + "_lambda_0"
-        plt.savefig(filename)
-    """
+    weights6, sse6, gradient6, iter6 = linear_regress(x_norm, y, 10 ** -5, 500000, 0)

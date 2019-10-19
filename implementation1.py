@@ -75,6 +75,8 @@ def linear_regress(x, y, eta, t, lamb):
     t: iterations
     lamb: regularization constant
     """
+    print(f'#Learning Rate : {eta}#####')
+
     n = 0
     e = np.zeros(len(y))
     errors = []
@@ -114,18 +116,31 @@ def linear_regress(x, y, eta, t, lamb):
         gradient.append(convergence_criteria)
 
         ####
-        print(f'#####Iteration : {n + 1}#####')
-        print(f'Gradient : {gradient[n]}')
+        # print(f'#####Iteration : {n+1}#####')
+        # print(f'Gradient : {gradient[n]}')
 
         ####
-        if (gradient[n] / (10 ** 10)) > 1 and (n + 1) <= 6:
+        if (gradient[n] / (10 ** 9)) > 1 and (n + 1) <= 6:
             t = 8
 
         n += 1
         if convergence_criteria < 0.5:
-            return w, errors, gradient
+            print(f'#Iteration : {n}#####')
+            print(f'Gradient : {gradient[n - 1]}')
+            print()
+            print()
+            print()
+            return w, errors, gradient, n
+        if (n) % 50 == 0:
+            print(f'#Iteration : {n}#####')
+            print(f'Gradient : {gradient[n - 1]}')
 
-    return w, errors, gradient
+    print(f'#Iteration : {n}#####')
+    print(f'Gradient : {gradient[n - 1]}')
+    print()
+    print()
+    print()
+    return w, errors, gradient, n
 
 if __name__ == '__main__':
     #####DATA PREP#####
@@ -146,6 +161,16 @@ if __name__ == '__main__':
 
     learning_rates = [10**0, 10**-1]#, 10**-2, 10**-3, 10**-4, 10**-5, 10**-6, 10**-7]
     lambdas = [0, 10**-3, 10**-2, 10**-1, 1, 10, 100]
+
+    weights1, sse1, gradient1, iter1 = linear_regress(x_norm, y, 10 ** 0, 50000, 0)
+    weights2, sse2, gradient2, iter2 = linear_regress(x_norm, y, 10 ** -1, 50000, 0)
+    weights3, sse3, gradient3, iter3 = linear_regress(x_norm, y, 10 ** -2, 50000, 0)
+    weights4, sse4, gradient4, iter4 = linear_regress(x_norm, y, 10 ** -3, 50000, 0)
+    weights5, sse5, gradient5, iter5 = linear_regress(x_norm, y, 10 ** -4, 50000, 0)
+    weights6, sse6, gradient6, iter6 = linear_regress(x_norm, y, 10 ** -5, 50000, 0)
+    weights7, sse7, gradient7, iter7 = linear_regress(x_norm, y, 10 ** -6, 50000, 0)
+    weights8, sse8, gradient8, iter8 = linear_regress(x_norm, y, 10 ** -7, 50000, 0)
+    """
     for learning_rate in learning_rates:
         if learning_rate == 1:
             string_learning_rate = "1e0"
@@ -172,3 +197,4 @@ if __name__ == '__main__':
         plt.ylabel('SSE')
         filename = "learning_rate_" + string_learning_rate + "_lambda_0"
         plt.savefig(filename)
+    """

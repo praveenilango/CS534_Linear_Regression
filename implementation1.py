@@ -75,7 +75,7 @@ def linear_regress(x, y, eta, t, lamb):
     t: iterations
     lamb: regularization constant
     """
-    print(f'#Learning Rate : {eta}#####')
+    print("#Learning Rate : " + str(eta) + "#####")
 
     n = 0
     e = np.zeros(len(y))
@@ -125,21 +125,25 @@ def linear_regress(x, y, eta, t, lamb):
 
         n += 1
         if convergence_criteria < 0.5:
-            print(f'#Iteration : {n}#####')
-            print(f'Gradient : {gradient[n - 1]}')
-            print()
-            print()
-            print()
+        	print("#Iteration: " + str(n) +"####")
+        	print("#Gradient: " + str(gradient[n-1]))
+
+            #print(f'#Iteration : {n}#####')
+            #print(f'Gradient : {gradient[n - 1]}')
+            print("")
+            print("")
+            print("")
             return w, errors, gradient, n
         if (n) % 50 == 0:
-            print(f'#Iteration : {n}#####')
-            print(f'Gradient : {gradient[n - 1]}')
+            print("#Iteration: " + str(n) +"####")
+        	print("#Gradient: " + str(gradient[n-1]))
 
-    print(f'#Iteration : {n}#####')
-    print(f'Gradient : {gradient[n - 1]}')
-    print()
-    print()
-    print()
+    print("#Iteration: " + str(n) +"####")
+    print("#Gradient: " + str(gradient[n-1]))
+
+    print("")
+    print("")
+    print("")
     return w, errors, gradient, n
 
 if __name__ == '__main__':

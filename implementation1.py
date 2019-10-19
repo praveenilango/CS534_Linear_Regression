@@ -23,8 +23,8 @@ def add_bias(df):
     return df
 
 
-# Seperate Features from response
-def seperate(df_train):
+# Separate Features from response
+def separate(df_train):
     """
     input: dataframe
     """
@@ -42,7 +42,7 @@ def seperate(df_train):
 # Add new features [Month, Day, Year]
 def split_date(df_train):
     """
-    splits date into seperate features
+    splits date into separate features
     input: dataframe
     """
     print("Splitting date...")
@@ -85,27 +85,40 @@ def linear_regress(x, y, eta, t, lamb):
     # Initialize weights [w] and predictions [y_hat]
     w = np.zeros(len(x[0]))
 
+    cur_grad = 0
+    prev_grad = 0
+
     while n < t:
         # Initialize gradient for each epoch
         gradient_vector = np.zeros(len(x[0]))
 
-        # Traverse through each data point
+        """        
+        #Traverse through each data point   
         for i in range(len(x)):
-            # Predicted value
-            y_hat = np.dot(w.T, x[i])
+            #Predicted value
+            y_hat = np.dot(w.T,x[i])
 
-            # Error
-            e[i] = ((y[i] - y_hat) ** 2)
+            #Error
+            e[i] = ((y[i] - y_hat)**2)
 
-            # Regularization
-            if np.dot(w.T, w) == 0:
+
+            #Regularization
+            if np.dot(w.T,w) == 0:
                 r = 0
             else:
-                r = (np.dot(w.T, w)) ** 0.5
+                r = (np.dot(w.T,w))**0.5
 
-            # Traverse through each feature to update corresponding weights
-            for j in range(len(x[0])):
-                gradient_vector[j] += ((-2) * (y[i] - y_hat) * x[i, j]) + (2 * lamb * r)
+            #Traverse through each feature to update corresponding weights
+            #for j in range(len(x[0])):
+            #    gradient_vector[j] += ((-2)*(y[i] - y_hat)*x[i,j]) + (2*lamb*r)
+            gradient_vector += 
+        """
+
+        # y_hat = np.matmul(w.T, x)
+        y_hat = np.matmul(x, w)
+        e = (y - y_hat) ** 2
+
+        gradient_vector = (-2) * np.matmul(x.T, (y - y_hat))
 
         # Update weights
         w -= eta * gradient_vector
@@ -134,6 +147,7 @@ def linear_regress(x, y, eta, t, lamb):
             print("")
             print("")
             return w, errors, gradient, n
+<<<<<<< HEAD
         if (n) % 50 == 0:
             print("#Iteration: " + str(n) +"####")
         	print("#Gradient: " + str(gradient[n-1]))
@@ -144,7 +158,43 @@ def linear_regress(x, y, eta, t, lamb):
     print("")
     print("")
     print("")
+=======
+        if (n) % 5000 == 0:
+            print(f'#Iteration : {n}#####')
+            print(f'Gradient : {gradient[n - 1]}')
+
+    print(f'#Iteration : {n}#####')
+    print(f'Gradient : {gradient[n - 1]}')
+    print()
+    print()
+    print()
+>>>>>>> 91685050929625f0cdae2a431431c9fa41c93f96
     return w, errors, gradient, n
+
+#Validate with validation data
+def get_sse(x, y, w):
+    """
+    :param x: input
+    :param y: output
+    :param w: weight from training model
+    :return: errors - sse
+    """
+
+    y_hat = np.matmul(x, w)
+    e = (y - y_hat) ** 2
+    return sum(e)
+
+#Statistics on Numerical
+def get_stats(df1, categoical_list):
+    print(df1.describe().transpose().drop(columns=['count','25%', '50%', '75%']).drop(categoical_list))
+
+#Frequency Count on Categorical
+def get_freq_percentage_count(df1, col_names):
+    for col in col_names:
+        percentage = (df1[col].value_counts(normalize=True).rename_axis('values').to_frame('freq_percentage').sort_index() * 100).round(1).astype(str) + '%'
+        freq = df1[col].value_counts().rename_axis('values').to_frame('freq_count')
+        result = pd.concat([percentage, freq], axis=1, join='inner')
+        print(result)
 
 if __name__ == '__main__':
     #####DATA PREP#####
@@ -153,19 +203,32 @@ if __name__ == '__main__':
     df_train, df_dev, df_test = get_data()
     # Drop ID Feature
     df_train = df_train.drop("id", axis=1)
+    df_validation = df_dev.drop("id", axis=1)
 
     # Grab features and Response
-    x, y = seperate(df_train)
+    x, y = separate(df_train)
+    x_val, y_val = separate(df_validation)
 
     # Normalize continuous features
     x_norm_df = normalize(x)
+    x_val_norm_df = normalize(x_val)
+
     # Add Bias
     x_norm_df = add_bias(x_norm_df)
     x_norm = x_norm_df.values
+    x_val_norm_df = add_bias(x_val_norm_df)
+    x_val_norm = x_val_norm_df.values
 
     learning_rates = [10**0, 10**-1]#, 10**-2, 10**-3, 10**-4, 10**-5, 10**-6, 10**-7]
     lambdas = [0, 10**-3, 10**-2, 10**-1, 1, 10, 100]
 
+    #get_stats(df_train, ['waterfront', 'grade', 'condition'])
+    #get_freq_percentage_count(df_train, ['waterfront', 'grade', 'condition'])
+
+    weights6, sse6, gradient6, iter6 = linear_regress(x_norm, y, 10 ** -5, 50000, 0)
+    #sse6_val = get_sse(x_val_norm, y_val,weights6)
+    #print(sse6_val)
+    """
     weights1, sse1, gradient1, iter1 = linear_regress(x_norm, y, 10 ** 0, 50000, 0)
     weights2, sse2, gradient2, iter2 = linear_regress(x_norm, y, 10 ** -1, 50000, 0)
     weights3, sse3, gradient3, iter3 = linear_regress(x_norm, y, 10 ** -2, 50000, 0)
@@ -174,7 +237,7 @@ if __name__ == '__main__':
     weights6, sse6, gradient6, iter6 = linear_regress(x_norm, y, 10 ** -5, 50000, 0)
     weights7, sse7, gradient7, iter7 = linear_regress(x_norm, y, 10 ** -6, 50000, 0)
     weights8, sse8, gradient8, iter8 = linear_regress(x_norm, y, 10 ** -7, 50000, 0)
-    """
+    
     for learning_rate in learning_rates:
         if learning_rate == 1:
             string_learning_rate = "1e0"

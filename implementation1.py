@@ -212,22 +212,22 @@ if __name__ == '__main__':
 
         weights, sse, gradient, iterations_count = linear_regress(x_norm, y, learning_rate, 15000000, 0)
         sse_val = get_sse(x_val_norm, y_val,weights)
+        filename = "learning_rate_" + string_learning_rate + "_lambda_0"
         print("learning rate: " + str(learning_rate))
         print("lambda: " + str(0))
         print("SSE training: " + str(sse[-1]))
         print("SSE validation: " + str(sse_val))
         print("Iteration Count: " + str(iterations_count))
-        print("weight:")
-        print(pd.DataFrame(weights, features_name))
+        pd.DataFrame(weights, features_name).to_csv("./weights/"+filename+".csv")
+        print("weight produced at: " + "./weights/"+"weights_"+filename+".csv")
         print()
 
         plt.plot(sse)
-        plt.title("SSE vs Iterations w/ Learning Rate " + str(learning_rate) + " & Lambdas " + str(0))
+        plt.title("SSE vs Iterations w/ Learning Rate: " + str(learning_rate) + " & Lambda: " + str(0))
         plt.legend(["Normalized SSE - Training Data"])
         plt.xlabel('iterations')
         plt.ylabel('SSE')
-        filename = "learning_rate_" + string_learning_rate + "_lambda_0"
-        plt.savefig(filename)
+        plt.savefig("./plots/"+filename)
 
     """
     for lamb in lambdas:
@@ -248,18 +248,22 @@ if __name__ == '__main__':
 
         weights, sse, gradient, iterations_count = linear_regress(x_norm, y, 10**-5, 15000000, lamb)
         sse_val = get_sse(x_val_norm, y_val, weights)
+        filename = "learning_rate_1e5" + "_lambda_" + string_lambdas
+        
         print("learning rate: " + str(10**-5))
         print("lambda: " + str(lamb))
         print("SSE training: " + str(sse[-1]))
         print("SSE validation: " + str(sse_val))
         print("Iteration Count: " + str(iterations_count))
+        pd.DataFrame(weights, features_name).to_csv("./weights/"+filename+".csv")
+        print("weight produced at: " + "./weights/"+"weights_"+filename+".csv")
         print()
 
         plt.plot(sse)
-        plt.title("SSE vs Iterations w/ Learning Rate " + str(10**-5) + " & Lambdas " + str(lamb))
+        plt.title("SSE vs Iterations w/ Learning Rate: " + str(10**-5) + " & Lambda: " + str(lamb))
         plt.legend(["Normalized SSE - Training Data"])
         plt.xlabel('iterations')
         plt.ylabel('SSE')
-        filename = "learning_rate_1e5" + "_lambda_" + string_lambdas
+        
         plt.savefig(filename)
     """

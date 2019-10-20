@@ -67,7 +67,7 @@ def normalize(df1):
 
 
 # Linear regression function
-def linear_regress(x, y, eta, t, lamb):
+def linear_regress(x, y, x_val, y_val, eta, t, lamb, normalized):
     """
     x: input/features
     y: opuput
@@ -80,6 +80,7 @@ def linear_regress(x, y, eta, t, lamb):
     n = 0
     e = np.zeros(len(y))
     errors = []
+    errors_val = []
     gradient = []
 
     # Initialize weights [w] and predictions [y_hat]
@@ -99,10 +100,13 @@ def linear_regress(x, y, eta, t, lamb):
         reg = np.array([i for i in w])
         reg[0] = 0
         gradient_vector = (-2) * np.matmul(x.T, (y - y_hat)) + 2*lamb*reg
-        # Update weights
-        w -= eta * gradient_vector
+
         # Calculate SSE
         errors.append(sum(e))
+        errors_val.append(get_sse(x_val, y_val, w))
+
+        # Update weights
+        w -= eta * gradient_vector
         # Norm of gradient
         convergence_criteria = np.dot(gradient_vector.T, gradient_vector) ** 0.5
         gradient.append(convergence_criteria)
@@ -112,8 +116,10 @@ def linear_regress(x, y, eta, t, lamb):
         # print(f'Gradient : {gradient[n]}')
 
         ####
-        if (gradient[n] / (10 ** 9)) > 1 and (n + 1) <= 6:
+        if (gradient[n] / (10 ** 9)) > 1 and (n + 1) <= 6 and normalized == True:
             t = 8
+        #elif (gradient[n] / (10 ** 80)) > 1 and (n + 1) <= 6 and normalized == False:
+        #    t = 8
 
         n += 1
         if convergence_criteria < 0.5:
@@ -125,7 +131,7 @@ def linear_regress(x, y, eta, t, lamb):
             print("")
             print("")
             print("")
-            return w, errors, gradient, n
+            return w, errors, errors_val, gradient, n
         if (n) % 50000 == 0:
 
             print("#Iteration: " + str(n) +"####")
@@ -134,7 +140,7 @@ def linear_regress(x, y, eta, t, lamb):
     print("#Iteration: " + str(n) +"####")
     print("#Gradient: " + str(gradient[n-1]))
 
-    return w, errors, gradient, n
+    return w, errors, errors_val, gradient, n
 
 #Validate with validation data
 def get_sse(x, y, w):
@@ -146,7 +152,7 @@ def get_sse(x, y, w):
     """
 
     y_hat = np.matmul(x, w)
-    e = (y - y_hat) ** 2
+    e = (y - y_hat)**2
     return sum(e)
 
 #Statistics on Numerical
@@ -173,6 +179,11 @@ if __name__ == '__main__':
     # Grab features and Response
     x, y = separate(df_train)
     x_val, y_val = separate(df_validation)
+
+    x_values = x.values
+    y_values = y
+    x_val_values = x_val.values
+    y_val_values = y_val
 
     # Normalize continuous features
     x_norm_df = normalize(x)
@@ -210,9 +221,9 @@ if __name__ == '__main__':
         elif learning_rate == 0.0000001:
             string_learning_rate = "1e-7"
 
-        weights, sse, gradient, iterations_count = linear_regress(x_norm, y, learning_rate, 15000000, 0)
+        weights, sse, sse_val_list, gradient, iterations_count = linear_regress(x_norm, y, x_val_norm, y_val, learning_rate, 500000, 0, True)
         sse_val = get_sse(x_val_norm, y_val,weights)
-        filename = "learning_rate_" + string_learning_rate + "_lambda_0"
+        filename = "Normalized_learning_rate_" + string_learning_rate + "_lambda_0"
         print("learning rate: " + str(learning_rate))
         print("lambda: " + str(0))
         print("SSE training: " + str(sse[-1]))
@@ -222,14 +233,24 @@ if __name__ == '__main__':
         print("weight produced at: " + "./weights/"+"weights_"+filename+".csv")
         print()
 
-        plt.plot(sse)
+        plt.plot(sse, label = "Normalized SSE - Training Data", color='blue')
+        plt.plot(sse_val_list, label = "Normalized SSE - Validation Data", color='red')
+        plt.legend(["Normalized SSE - Training Data", "Normalized SSE - Validation Data"], loc = 1)
         plt.title("SSE vs Iterations w/ Learning Rate: " + str(learning_rate) + " & Lambda: " + str(0))
-        plt.legend(["Normalized SSE - Training Data"])
-        plt.xlabel('iterations')
+        plt.xlabel('iterations: ' + str(iterations_count))
         plt.ylabel('SSE')
-        plt.savefig("./plots/"+filename)
+        plt.savefig("./plots/"+"Normalized_"+filename)
 
-    """
+def plot(sse, sse_val_list, legends, learning_rate, lamb, iterations_count, filename):
+    plt.plot(sse, color='blue')
+    plt.plot(sse_val_list, color='red')
+    plt.legend(legends, loc=1)
+    plt.title("SSE vs Iterations w/ Learning Rate: " + str(learning_rate) + " & Lambda: " + str(lamb))
+    plt.xlabel('iterations: ' + str(iterations_count))
+    plt.ylabel('SSE')
+    plt.savefig("./plots/" + filename)
+
+
     for lamb in lambdas:
         if lamb == 1:
             string_lambdas = "1e0"
@@ -246,10 +267,10 @@ if __name__ == '__main__':
         elif lamb == 100:
             string_lambdas = "1e2"
 
-        weights, sse, gradient, iterations_count = linear_regress(x_norm, y, 10**-5, 15000000, lamb)
+        weights, sse, sse_val_list, gradient, iterations_count = linear_regress(x_norm, y, x_val_norm, y_val, 10**-5, 500000, lamb, True)
         sse_val = get_sse(x_val_norm, y_val, weights)
         filename = "learning_rate_1e5" + "_lambda_" + string_lambdas
-        
+
         print("learning rate: " + str(10**-5))
         print("lambda: " + str(lamb))
         print("SSE training: " + str(sse[-1]))
@@ -259,11 +280,49 @@ if __name__ == '__main__':
         print("weight produced at: " + "./weights/"+"weights_"+filename+".csv")
         print()
 
-        plt.plot(sse)
+        plt.plot(sse, label = "Normalized SSE - Training Data", color='blue')
+        plt.plot(sse_val_list, label = "Normalized SSE - Validation Data", color='red')
+        plt.legend(["Normalized SSE - Training Data", "Normalized SSE - Validation Data"], loc = 1)
         plt.title("SSE vs Iterations w/ Learning Rate: " + str(10**-5) + " & Lambda: " + str(lamb))
-        plt.legend(["Normalized SSE - Training Data"])
-        plt.xlabel('iterations')
+        plt.xlabel('iterations: ' + str(iterations_count))
         plt.ylabel('SSE')
         
-        plt.savefig(filename)
-    """
+        plt.savefig("./plots/"+"Normalized_"+filename)
+"""
+    #### NON NORMALIZED X ###
+    learning_rates_non_normalized = [1, 0, 10**-3, 10**-6, 10**-9, 10**-15]
+    for learning_rate in learning_rates_non_normalized:
+        if learning_rate == 1:
+            string_learning_rate = "1e0"
+        elif learning_rate == 0:
+            string_learning_rate = "0"
+        elif learning_rate == 0.001:
+            string_learning_rate = "1e-3"
+        elif learning_rate == 0.000001:
+            string_learning_rate = "1e-6"
+        elif learning_rate == 0.000000001:
+            string_learning_rate = "1e-9"
+        elif learning_rate == 0.000000000000001:
+            string_learning_rate = "1e-15"
+
+        weights, sse, sse_val_list, gradient, iterations_count = linear_regress(x_values, y_values, x_val_values, y_val_values,
+                                                                                learning_rate, 10000, 0, False)
+        sse_val = get_sse(x_val_values, y_val_values, weights)
+        filename = "learning_rate_" + string_learning_rate + "_lambda_0"
+        print("learning rate: " + str(learning_rate))
+        print("lambda: " + str(0))
+        print("SSE training: " + str(sse[-1]))
+        print("SSE validation: " + str(sse_val))
+        print("Iteration Count: " + str(iterations_count))
+        pd.DataFrame(weights, features_name).to_csv("./weights/" + filename + ".csv")
+        print("weight produced at: " + "./weights/" + "weights_" + filename + ".csv")
+        print()
+
+        plt.plot(sse, label="Non-Normalized SSE - Training Data", color='blue')
+        plt.plot(sse_val_list, label="Non-Normalized SSE - Validation Data", color='red')
+        plt.legend(["Non-Normalized SSE - Training Data", "Non-Normalized SSE - Validation Data"], loc=1)
+        plt.title("SSE vs Iterations w/ Learning Rate: " + str(learning_rate) + " & Lambda: " + str(0))
+        plt.xlabel('iterations: ' + str(iterations_count))
+        plt.ylabel('SSE')
+        plt.savefig("./plots/" + "Non_Normalized_" + filename)
+"""

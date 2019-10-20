@@ -34,7 +34,7 @@ def separate(df_train):
     x = split_date(x)
     x = x.drop(["date"], axis=1)
     # Grab response y
-    y = df_train.iloc[:, -1]
+    y = df_train.iloc[:, -1].values
 
     return x, y
 
@@ -119,7 +119,6 @@ def linear_regress(x, y, eta, t, lamb):
         e = (y - y_hat) ** 2
 
         gradient_vector = (-2) * np.matmul(x.T, (y - y_hat))
-
         # Update weights
         w -= eta * gradient_vector
         # Calculate SSE
@@ -144,7 +143,7 @@ def linear_regress(x, y, eta, t, lamb):
             print()
             print()
             return w, errors, gradient, n
-        if (n) % 5000 == 0:
+        if (n) % 50000 == 0:
             print(f'#Iteration : {n}#####')
             print(f'Gradient : {gradient[n - 1]}')
 
@@ -170,7 +169,7 @@ def get_sse(x, y, w):
 
 #Statistics on Numerical
 def get_stats(df1, categoical_list):
-    print(df1.describe().transpose().drop(columns=['count','25%', '50%', '75%']).drop(categoical_list))
+    df1.describe().transpose().drop(columns=['count','25%', '50%', '75%']).drop(categoical_list).to_csv('training_stats.csv')
 
 #Frequency Count on Categorical
 def get_freq_percentage_count(df1, col_names):
@@ -178,7 +177,7 @@ def get_freq_percentage_count(df1, col_names):
         percentage = (df1[col].value_counts(normalize=True).rename_axis('values').to_frame('freq_percentage').sort_index() * 100).round(1).astype(str) + '%'
         freq = df1[col].value_counts().rename_axis('values').to_frame('freq_count')
         result = pd.concat([percentage, freq], axis=1, join='inner')
-        print(result)
+        result.to_csv(col+"_frequency.csv")
 
 if __name__ == '__main__':
     #####DATA PREP#####
@@ -203,25 +202,12 @@ if __name__ == '__main__':
     x_val_norm_df = add_bias(x_val_norm_df)
     x_val_norm = x_val_norm_df.values
 
-    learning_rates = [10**0, 10**-1]#, 10**-2, 10**-3, 10**-4, 10**-5, 10**-6, 10**-7]
+    learning_rates = [10**0, 10**-1, 10**-2, 10**-3, 10**-4, 10**-5, 10**-6, 10**-7]
     lambdas = [0, 10**-3, 10**-2, 10**-1, 1, 10, 100]
 
-    #get_stats(df_train, ['waterfront', 'grade', 'condition'])
-    #get_freq_percentage_count(df_train, ['waterfront', 'grade', 'condition'])
+    get_stats(df_train, ['waterfront', 'grade', 'condition'])
+    get_freq_percentage_count(df_train, ['waterfront', 'grade', 'condition'])
 
-    weights6, sse6, gradient6, iter6 = linear_regress(x_norm, y, 10 ** -5, 50000, 0)
-    #sse6_val = get_sse(x_val_norm, y_val,weights6)
-    #print(sse6_val)
-    """
-    weights1, sse1, gradient1, iter1 = linear_regress(x_norm, y, 10 ** 0, 50000, 0)
-    weights2, sse2, gradient2, iter2 = linear_regress(x_norm, y, 10 ** -1, 50000, 0)
-    weights3, sse3, gradient3, iter3 = linear_regress(x_norm, y, 10 ** -2, 50000, 0)
-    weights4, sse4, gradient4, iter4 = linear_regress(x_norm, y, 10 ** -3, 50000, 0)
-    weights5, sse5, gradient5, iter5 = linear_regress(x_norm, y, 10 ** -4, 50000, 0)
-    weights6, sse6, gradient6, iter6 = linear_regress(x_norm, y, 10 ** -5, 50000, 0)
-    weights7, sse7, gradient7, iter7 = linear_regress(x_norm, y, 10 ** -6, 50000, 0)
-    weights8, sse8, gradient8, iter8 = linear_regress(x_norm, y, 10 ** -7, 50000, 0)
-    
     for learning_rate in learning_rates:
         if learning_rate == 1:
             string_learning_rate = "1e0"
@@ -240,12 +226,52 @@ if __name__ == '__main__':
         elif learning_rate == 0.0000001:
             string_learning_rate = "1e-7"
 
-        weights, sse, gradient = linear_regress(x_norm, y, learning_rate, 2000, 0)
+        weights, sse, gradient, iterations_count = linear_regress(x_norm, y, learning_rate, 15000000, 0)
+        sse_val = get_sse(x_val_norm, y_val,weights)
+        print("learning rate: " + str(learning_rate))
+        print("lambda: " + str(0))
+        print("SSE training: " + str(sse[-1]))
+        print("SSE validation: " + str(sse_val))
+        print("Iteration Count: " + str(iterations_count))
+        print()
+
         plt.plot(sse)
-        plt.title("SSE vs Iterations w/ Learning Rate "+ str(learning_rate) )
+        plt.title("SSE vs Iterations w/ Learning Rate " + str(learning_rate) + " & Lambdas " + str(0))
         plt.legend(["Normalized SSE - Training Data"])
         plt.xlabel('iterations')
         plt.ylabel('SSE')
         filename = "learning_rate_" + string_learning_rate + "_lambda_0"
         plt.savefig(filename)
-    """
+
+    for lamb in lambdas:
+        if lamb == 1:
+            string_lambdas = "1e0"
+        elif lamb == 0:
+            string_lambdas = "0"
+        elif lamb == 0.001:
+            string_lambdas = "1e-3"
+        elif lamb == 0.01:
+            string_lambdas = "1e-2"
+        elif lamb == 0.1:
+            string_lambdas = "1e-1"
+        elif lamb == 10:
+            string_lambdas = "1e1"
+        elif lamb == 100:
+            string_lambdas = "1e2"
+
+        weights, sse, gradient, iterations_count = linear_regress(x_norm, y, 10**-5, 15000000, lamb)
+        sse_val = get_sse(x_val_norm, y_val, weights)
+        print("learning rate: " + str(10**-5))
+        print("lambda: " + str(lamb))
+        print("SSE training: " + str(sse[-1]))
+        print("SSE validation: " + str(sse_val))
+        print("Iteration Count: " + str(iterations_count))
+        print()
+
+        plt.plot(sse)
+        plt.title("SSE vs Iterations w/ Learning Rate " + str(10**-5) + " & Lambdas " + str(lamb))
+        plt.legend(["Normalized SSE - Training Data"])
+        plt.xlabel('iterations')
+        plt.ylabel('SSE')
+        filename = "learning_rate_1e5" + "_lambda_" + string_lambdas
+        plt.savefig(filename)

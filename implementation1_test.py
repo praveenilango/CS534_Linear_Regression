@@ -34,7 +34,7 @@ def seperate(df_train):
     x = split_date(x)
     x = x.drop(["date"], axis=1)
     # Grab response y
-    y = df_train.iloc[:, -1]
+    y = df_train.iloc[:, -1].values
 
     return x, y
 
@@ -116,10 +116,15 @@ def linear_regress(x, y, eta, t, lamb):
 
         # y_hat = np.matmul(w.T, x)
         y_hat = np.matmul(x, w)
+        samp = y - y_hat
         e = (y - y_hat) ** 2
-        print(x.T)
-        print((y - y_hat))
-        gradient_vector = (-2) * np.matmul(x.T,(y - y_hat))
+        print(np.shape(x))
+        print(np.shape(w))
+        print(np.shape(x.T))
+        print(np.shape(y))
+        print(np.shape(y_hat))
+        print(np.shape(y - y_hat))
+        gradient_vector = (-2) * np.matmul(x.T,y)
 
         # Update weights
         w -= eta * gradient_vector
@@ -173,6 +178,5 @@ if __name__ == '__main__':
     x_norm_df = add_bias(x_norm_df)
     x_norm = x_norm_df.values
 
-    x_norm_df
 
     weights6, sse6, gradient6, iter6 = linear_regress(x_norm, y, 10 ** -5, 500000, 0)

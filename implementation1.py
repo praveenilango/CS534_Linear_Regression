@@ -221,9 +221,9 @@ if __name__ == '__main__':
         elif learning_rate == 0.0000001:
             string_learning_rate = "1e-7"
 
-        weights, sse, sse_val_list, gradient, iterations_count = linear_regress(x_norm, y, x_val_norm, y_val, learning_rate, 500000, 0, True)
+        weights, sse, sse_val_list, gradient, iterations_count = linear_regress(x_norm, y, x_val_norm, y_val, learning_rate, 200000, 0, True)
         sse_val = get_sse(x_val_norm, y_val,weights)
-        filename = "Normalized_learning_rate_" + string_learning_rate + "_lambda_0"
+        filename = "learning_rate_" + string_learning_rate + "_lambda_0"
         print("learning rate: " + str(learning_rate))
         print("lambda: " + str(0))
         print("SSE training: " + str(sse[-1]))
@@ -239,16 +239,10 @@ if __name__ == '__main__':
         plt.title("SSE vs Iterations w/ Learning Rate: " + str(learning_rate) + " & Lambda: " + str(0))
         plt.xlabel('iterations: ' + str(iterations_count))
         plt.ylabel('SSE')
+        if iterations_count > 1000:
+            plt.xlim(0, 30000)
         plt.savefig("./plots/"+"Normalized_"+filename)
 
-def plot(sse, sse_val_list, legends, learning_rate, lamb, iterations_count, filename):
-    plt.plot(sse, color='blue')
-    plt.plot(sse_val_list, color='red')
-    plt.legend(legends, loc=1)
-    plt.title("SSE vs Iterations w/ Learning Rate: " + str(learning_rate) + " & Lambda: " + str(lamb))
-    plt.xlabel('iterations: ' + str(iterations_count))
-    plt.ylabel('SSE')
-    plt.savefig("./plots/" + filename)
 
 
     for lamb in lambdas:
@@ -267,9 +261,9 @@ def plot(sse, sse_val_list, legends, learning_rate, lamb, iterations_count, file
         elif lamb == 100:
             string_lambdas = "1e2"
 
-        weights, sse, sse_val_list, gradient, iterations_count = linear_regress(x_norm, y, x_val_norm, y_val, 10**-5, 500000, lamb, True)
+        weights, sse, sse_val_list, gradient, iterations_count = linear_regress(x_norm, y, x_val_norm, y_val, 10**-5, 200000, lamb, True)
         sse_val = get_sse(x_val_norm, y_val, weights)
-        filename = "learning_rate_1e5" + "_lambda_" + string_lambdas
+        filename = "learning_rate_1e-5" + "_lambda_" + string_lambdas
 
         print("learning rate: " + str(10**-5))
         print("lambda: " + str(lamb))

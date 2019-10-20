@@ -85,9 +85,6 @@ def linear_regress(x, y, eta, t, lamb):
     # Initialize weights [w] and predictions [y_hat]
     w = np.zeros(len(x[0]))
 
-    cur_grad = 0
-    prev_grad = 0
-
     while n < t:
         # Initialize gradient for each epoch
         gradient_vector = np.zeros(len(x[0]))

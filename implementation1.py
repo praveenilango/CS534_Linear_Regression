@@ -92,33 +92,13 @@ def linear_regress(x, y, eta, t, lamb):
         # Initialize gradient for each epoch
         gradient_vector = np.zeros(len(x[0]))
 
-        """        
-        #Traverse through each data point   
-        for i in range(len(x)):
-            #Predicted value
-            y_hat = np.dot(w.T,x[i])
-
-            #Error
-            e[i] = ((y[i] - y_hat)**2)
-
-
-            #Regularization
-            if np.dot(w.T,w) == 0:
-                r = 0
-            else:
-                r = (np.dot(w.T,w))**0.5
-
-            #Traverse through each feature to update corresponding weights
-            #for j in range(len(x[0])):
-            #    gradient_vector[j] += ((-2)*(y[i] - y_hat)*x[i,j]) + (2*lamb*r)
-            gradient_vector += 
-        """
-
         # y_hat = np.matmul(w.T, x)
         y_hat = np.matmul(x, w)
         e = (y - y_hat) ** 2
 
-        gradient_vector = (-2) * np.matmul(x.T, (y - y_hat))
+        reg = np.array([i for i in w])
+        reg[0] = 0
+        gradient_vector = (-2) * np.matmul(x.T, (y - y_hat)) + 2*lamb*reg
         # Update weights
         w -= eta * gradient_vector
         # Calculate SSE
@@ -137,8 +117,8 @@ def linear_regress(x, y, eta, t, lamb):
 
         n += 1
         if convergence_criteria < 0.5:
-        	print("#Iteration: " + str(n) +"####")
-        	print("#Gradient: " + str(gradient[n-1]))
+            print("#Iteration: " + str(n) +"####")
+            print("#Gradient: " + str(gradient[n-1]))
 
             #print(f'#Iteration : {n}#####')
             #print(f'Gradient : {gradient[n - 1]}')
@@ -146,32 +126,14 @@ def linear_regress(x, y, eta, t, lamb):
             print("")
             print("")
             return w, errors, gradient, n
-<<<<<<< HEAD
         if (n) % 50000 == 0:
-=======
-<<<<<<< HEAD
-        if (n) % 50 == 0:
+
             print("#Iteration: " + str(n) +"####")
-        	print("#Gradient: " + str(gradient[n-1]))
+            print("#Gradient: " + str(gradient[n-1]))
 
     print("#Iteration: " + str(n) +"####")
     print("#Gradient: " + str(gradient[n-1]))
 
-    print("")
-    print("")
-    print("")
-=======
-        if (n) % 5000 == 0:
->>>>>>> 6bbdd8952f1455039a7e4d9c05cb3ee28b38aad3
-            print(f'#Iteration : {n}#####')
-            print(f'Gradient : {gradient[n - 1]}')
-
-    print(f'#Iteration : {n}#####')
-    print(f'Gradient : {gradient[n - 1]}')
-    print()
-    print()
-    print()
->>>>>>> 91685050929625f0cdae2a431431c9fa41c93f96
     return w, errors, gradient, n
 
 #Validate with validation data
@@ -215,6 +177,7 @@ if __name__ == '__main__':
     # Normalize continuous features
     x_norm_df = normalize(x)
     x_val_norm_df = normalize(x_val)
+    features_name = x_norm_df.columns
 
     # Add Bias
     x_norm_df = add_bias(x_norm_df)
@@ -227,6 +190,7 @@ if __name__ == '__main__':
 
     get_stats(df_train, ['waterfront', 'grade', 'condition'])
     get_freq_percentage_count(df_train, ['waterfront', 'grade', 'condition'])
+
 
     for learning_rate in learning_rates:
         if learning_rate == 1:
@@ -253,6 +217,8 @@ if __name__ == '__main__':
         print("SSE training: " + str(sse[-1]))
         print("SSE validation: " + str(sse_val))
         print("Iteration Count: " + str(iterations_count))
+        print("weight:")
+        print(pd.DataFrame(weights, features_name))
         print()
 
         plt.plot(sse)
@@ -263,6 +229,7 @@ if __name__ == '__main__':
         filename = "learning_rate_" + string_learning_rate + "_lambda_0"
         plt.savefig(filename)
 
+    """
     for lamb in lambdas:
         if lamb == 1:
             string_lambdas = "1e0"
@@ -295,3 +262,4 @@ if __name__ == '__main__':
         plt.ylabel('SSE')
         filename = "learning_rate_1e5" + "_lambda_" + string_lambdas
         plt.savefig(filename)
+    """
